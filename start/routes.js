@@ -36,7 +36,6 @@ Route.get("/viewUserTeam","TeamCreation/TeamManagementController.viewUserTeam").
 Route.get("/viewUserProfile","TeamCreation/TeamManagementController.viewUserProfile").middleware(['auth'])
 
 
-Route.get("/updateRankings","Metadata/MetadatumController.updateRanking")
-
-
-
+Route.get("/updateRankings","Metadata/MetadatumController.updateRanking").middleware(['auth'])
+Route.get("/viewSquadRankings","Ranking/RankingController.viewSquadRankings").middleware(['auth'])
+Route.get("/userTeamRanking","Ranking/RankingController.userTeamRankings").middleware(['auth'])

@@ -9,10 +9,13 @@ class PlayerSquadSchema extends Schema {
       table.increments()
       table.integer("player_id")
       table.integer("squad_id")
+      table.integer("week_season_id")
       table.string("wing")
       table.boolean("is_captain").defaultTo(0)
       table.boolean("is_substitute").default(0)
       table.string("placement")
+      table.integer("week_season_id")
+      table.integer("points_total")
       table.timestamps()
     })
   }

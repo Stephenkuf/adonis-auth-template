@@ -4,7 +4,6 @@ const PointSetting = use("App/Models/PointSetting");
 const Player = use("App/Models/Player");
 const PlayerSquad  = use("App/Models/PlayerSquad");
 const WeekSeason  = use("App/Models/WeekSeason");
-const PlayerWeeklyPoint  = use("App/Models/PlayerWeeklyPoint");
 const League = use("App/Models/League");
 const makeExternalRequestFeature = use("App/Features/MakeExternalRequestFeature");
 const Config = use("Config");
@@ -22,36 +21,56 @@ class UpdateRankingFeature {
 
   async updateRankings(){
 
-    async function updatePlayerScores(paramType , playerWing , playerInfo){
-      console.log(paramType , playerWing , playerInfo );
+    async function updatePlayerScores(paramType , playerSquadDetails , playerInfo){
       // get points for goals for player
+
+      console.log({playerSquadDetails});
       const pointParameters = await PointParams.query().where({
         param_type: paramType,
-        player_type: playerWing
+        player_type: playerSquadDetails.wing
       }).first()
 
       const currentweekSeason  = await WeekSeason.query().where("is_current_week", 1).andWhere("is_current_season",  1).first()
       const pointSettings = await PointSetting.query().where("param_id" ,pointParameters.id).first()
       const pointsForPlayer = pointSettings.points
-    const playerToUpdate =  await PlayerWeeklyPoint.query()
+    const playerToUpdate =  await PlayerSquad.query()
         .where({
           player_id:playerInfo[0],
           week_season_id: currentweekSeason.id
         }).first()
 
-        console.log({playerToUpdate});
 
       if(!playerToUpdate){
-        await PlayerWeeklyPoint.create({
-          player_id:playerInfo[0],
-          week_season_id:currentweekSeason.id,
-          points_total:pointsForPlayer
-        })
+        return{
+          status:"Internal Server Error", 
+          status_code:500, 
+          message: "Player not found"
+        } 
       }
       else{
         playerToUpdate.points_total = playerToUpdate.points_total + pointsForPlayer
-        
         const responseFromUpdate = await  playerToUpdate.save()
+
+        // update squad points 
+        const updateSquadPoints = await League.query().where(
+          { 
+            player_squad_id:playerSquadDetails.squad_id ,
+            week_season_id: currentweekSeason.id
+          }).first()
+
+          if (!updateSquadPoints) {
+            await League.findOrCreate(
+              { 
+                player_squad_id:playerSquadDetails.squad_id ,
+                week_season_id:  currentweekSeason.id,
+                points_total:pointsForPlayer
+              })
+    
+          } else {
+            updateSquadPoints.points_total =  updateSquadPoints.points_total + pointsForPlayer
+           await updateSquadPoints.save()
+          }
+
         return responseFromUpdate
       }
        
@@ -125,7 +144,7 @@ class UpdateRankingFeature {
                   .fetch()
 
             const  playerDetailsJson = getPlayerDetails.toJSON();
-            const playerWing = playerDetailsJson[0].wing
+            const playerSquadDetails = playerDetailsJson[0]
             // check if player scored a goal
             const playerGoalStat =  playerFixtureStatistics[i].statistics["0"].goals
             let paramType;
@@ -136,7 +155,7 @@ class UpdateRankingFeature {
             }
             else if(!playerGoalStat.conceded){
               paramType = "Clean Sheet";
-              const resultFromUpdate =await updatePlayerScores(paramType, playerWing,  getPlayerInSystem)
+              const resultFromUpdate =await updatePlayerScores(paramType, playerSquadDetails,  getPlayerInSystem)
               console.log({resultFromUpdate});
             }
             else if(playerGoalStat.assists){
