@@ -54,15 +54,15 @@ class RankingController {
                 message: `Rankings Fetched successfully`,
             })
         } catch (viewRankingsError) {
-            console.log("ViewSquad Error >>>>> ", viewRankingsError);
+            console.log("View Squad Error >>>>> ", viewRankingsError);
             return response.status(500).json({
                 result:viewRankingsError, 
                 status:"Internal Server Error", 
                 status_code:500, 
-                message: "There was an error fetchingRankings"
-             })  
+                message: "There was an error fetching Rankings"
+             }) 
         }
     }
 }
 
-module.exports = RankingController
+module.exports = RankingController;

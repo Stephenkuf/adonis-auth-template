@@ -1,4 +1,7 @@
 'use strict'
+
+const { first } = require("@adonisjs/lucid/src/Lucid/Model");
+
 const TeamSquad = use("App/Models/TeamSquad");
 const TeamName = use("App/Models/TeamName");
 const Player = use("App/Models/Player");
@@ -210,14 +213,20 @@ class TeamManagementController {
    async viewUserTeam({request , response , auth }){
         try {
             const user = auth.current.user
-            const viewUserTeam = await TeamSquad.query()
-            .where("user_id", user.id)
-            .with("players")
-            .with("teamName")
+
+            const userSquad = await TeamSquad.query().where("user_id", user.id).first()
+            const teamDetails = await TeamName.query().where("user_id", user.id).first()
+
+            const viewUserTeam = await PlayerSquad.query()
+            .where("squad_id", userSquad.id)
+            .with("player")
             .fetch()
         
             return response.status(200).json({
-                result: viewUserTeam,
+                result: {
+                    players:viewUserTeam.toJSON(),
+                    teamDetails:teamDetails
+                },
                 label: `Team Fetching`,
                 statusCode: 200,
                 message: `User team Fetched successfully`,
