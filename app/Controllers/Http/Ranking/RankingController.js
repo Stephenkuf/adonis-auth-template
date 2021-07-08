@@ -19,7 +19,7 @@ class RankingController {
         
             return response.status(200).json({
                 result: getWeeklyRanking,
-                label: `Rankings `,
+                label: `Rankings`,
                 statusCode: 200,
                 message: `Rankings Fetched successfully`,
             })
@@ -49,9 +49,9 @@ class RankingController {
         
             return response.status(200).json({
                 result: getWeeklyRanking,
-                label: `Rankings `,
+                label: `User team Rankings`,
                 statusCode: 200,
-                message: `Rankings Fetched successfully`,
+                message: `User Team Rankings Fetched successfully`,
             })
         } catch (viewRankingsError) {
             console.log("View Squad Error >>>>> ", viewRankingsError);

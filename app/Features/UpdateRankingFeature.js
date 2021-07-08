@@ -143,6 +143,8 @@ class UpdateRankingFeature {
                   })
                   .fetch()
 
+                  console.log({getPlayerDetails});
+
             const  playerDetailsJson = getPlayerDetails.toJSON();
             const playerSquadDetails = playerDetailsJson[0]
             // check if player scored a goal
@@ -150,7 +152,7 @@ class UpdateRankingFeature {
             let paramType;
             if(playerGoalStat.total){ //CHECK THIS LOGIC HERE AGAIN 
                paramType = "Goal";
-               const resultFromUpdate =await updatePlayerScores(paramType, playerWing,  getPlayerInSystem)
+               const resultFromUpdate =await updatePlayerScores(paramType, playerSquadDetails,  getPlayerInSystem)
                console.log({resultFromUpdate});
             }
             else if(!playerGoalStat.conceded){
@@ -160,7 +162,7 @@ class UpdateRankingFeature {
             }
             else if(playerGoalStat.assists){
               paramType = "Goal Assist";
-              const resultFromUpdate =await updatePlayerScores(paramType, playerWing,  getPlayerInSystem)
+              const resultFromUpdate =await updatePlayerScores(paramType, playerSquadDetails,  getPlayerInSystem)
               console.log({resultFromUpdate});
             }
           } 

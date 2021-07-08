@@ -215,13 +215,38 @@ class TeamManagementController {
             const user = auth.current.user
 
             const userSquad = await TeamSquad.query().where("user_id", user.id).first()
+            if(!userSquad){
+                return response.status(200).json({
+                    result: {},
+                    label: `Team Fetch`,
+                    statusCode: 200,
+                    message: `You don't have a team yet.`,
+                })
+            }
+
             const teamDetails = await TeamName.query().where("user_id", user.id).first()
 
+            if(!teamDetails){
+                return response.status(200).json({
+                    result: {},
+                    label: `Team Fetch`,
+                    statusCode: 200,
+                    message: `You don't have a team yet.`,
+                })
+            }
             const viewUserTeam = await PlayerSquad.query()
             .where("squad_id", userSquad.id)
             .with("player")
             .fetch()
         
+            if(!viewUserTeam){
+                return response.status(200).json({
+                    result: {},
+                    label: `Team Fetch`,
+                    statusCode: 200,
+                    message: `You don't have a team yet.`,
+                })
+            }
             return response.status(200).json({
                 result: {
                     players:viewUserTeam.toJSON(),
