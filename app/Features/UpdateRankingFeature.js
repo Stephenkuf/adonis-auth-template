@@ -60,14 +60,14 @@ class UpdateRankingFeature {
             // update squad points 
             const updateSquadPoints = await League.query().where(
               { 
-                player_squad_id:currentPlayer.squad_id ,
+                squad_id:currentPlayer.squad_id ,
                 week_season_id: currentweekSeason.id
               }).first()
 
               if (!updateSquadPoints) {
                 await League.findOrCreate(
                   { 
-                    player_squad_id:currentPlayer.squad_id ,
+                    squad_id:currentPlayer.squad_id ,
                     week_season_id:  currentweekSeason.id,
                     points_total:pointsForPlayer
                   }

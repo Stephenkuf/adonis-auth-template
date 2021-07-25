@@ -7,7 +7,7 @@ class LeaguesSchema extends Schema {
   up () {
     this.create('leagues', (table) => {
       table.increments()
-      table.integer("player_squad_id")
+      table.integer("squad_id")
       table.integer("week_season_id")
       table.integer("points_total")
       table.timestamps()

@@ -40,6 +40,15 @@ class RankingController {
             const currentweekSeason  = await WeekSeason.query().where("is_current_week", 1).andWhere("is_current_season",  1).first()
             const userSquad  = await TeamSquad.query().where("user_id", user.id).first()
 
+            const teamWeekStats =  await League.query()
+            .where("squad_id",userSquad.id )
+            .where("week_season_id", currentweekSeason.id)
+            .with("squad" ,builder => builder.with("teamName"))
+            .orderBy("points_total" , "desc")
+            .fetch()
+
+            console.log({userSquad});
+
             const getPlayerWeekRanking =  await PlayerSquad.query()
             .where("squad_id", userSquad.id)
             .andWhere("week_season_id", currentweekSeason.id)
@@ -47,8 +56,14 @@ class RankingController {
             .orderBy("points_total" , "desc")
             .fetch()
         
+
             return response.status(200).json({
-                result: getPlayerWeekRanking,
+                result:{
+                    squadStats:getPlayerWeekRanking,
+                    currentGameweek:currentweekSeason.week,
+                    teamInfo:teamWeekStats,
+            
+                }  ,
                 label: `User team Rankings`,
                 statusCode: 200,
                 message: `User Team Rankings Fetched successfully`,
