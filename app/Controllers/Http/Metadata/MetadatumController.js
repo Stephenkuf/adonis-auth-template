@@ -44,6 +44,8 @@ class MetadatumController {
         //    league_id: 87
         //  Spain
         //  league_id: 8 
+        //holland
+
        try {
         const baseUrl = Config.get("rapidApi.getTeamsByLeagueIdEndpoint")
         
@@ -91,7 +93,7 @@ class MetadatumController {
     //   return await new makeExternalRequestFeature({endpoint}).makeGetRequest()
     // }
 
-    const currentyear = new Date().getFullYear() - 1;
+    const currentyear = new Date().getFullYear();
     const teamEndpoints = [ 
       `${baseUrl}?league=39&season=${currentyear}`,
       `${baseUrl}?league=135&season=${currentyear}`,
@@ -216,9 +218,9 @@ class MetadatumController {
 
   async updateRanking({response}){  
     try {
-       let responseFromApi = await new updatePointsFeature({}).updateRankings()
+    let responseFromApi = await new updatePointsFeature({}).updateRankings()
 
-       console.log({responseFromApi});
+      console.log({responseFromApi});
           
         return response.status(200).json({
           results:responseFromApi,

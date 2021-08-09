@@ -9,6 +9,7 @@ class PointParamsSchema extends Schema {
       table.increments()
       table.string("param_type")
       table.string("player_type")
+      table.integer("points")
       table.timestamps()
     })
   }

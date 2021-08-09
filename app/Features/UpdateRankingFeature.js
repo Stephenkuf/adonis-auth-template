@@ -1,10 +1,9 @@
 "use strict"
 const PointRanking = use("App/Models/PointRanking");
-const PointSetting = use("App/Models/PointSetting");
 const Player = use("App/Models/Player");
 const PlayerSquad  = use("App/Models/PlayerSquad");
 const WeekSeason  = use("App/Models/WeekSeason");
-const League = use("App/Models/League");
+const SquadPoints = use("App/Models/SquadPoint");
 const makeExternalRequestFeature = use("App/Features/MakeExternalRequestFeature");
 const Config = use("Config");
 const Env = use("Env");
@@ -24,7 +23,7 @@ class UpdateRankingFeature {
     async function updatePlayerScores(paramType , playerInfo){
       // get points for goals for player
 
-     const currentweekSeason  = await WeekSeason.query().where("is_current_week", 1).andWhere("is_current_season",  1).first()
+     const currentweekSeason  = await WeekSeason.query().where("is_current", 1).first()
     //  Get all player in squads with id passed 
      const playerToUpdate =  await PlayerSquad.query()
         .where({
@@ -49,8 +48,8 @@ class UpdateRankingFeature {
               param_type: paramType,
               player_type: currentPlayer.wing
             }).first()
-            const pointSettings = await PointSetting.query().where("param_id" ,pointParameters.id).first()
-            const pointsForPlayer = pointSettings.points
+
+            const pointsForPlayer = pointParameters.points
 
           const currentPlayerUpdate = await PlayerSquad.query().where("id",currentPlayer.id).first()
           
@@ -58,14 +57,14 @@ class UpdateRankingFeature {
           const responseFromUpdate = await currentPlayerUpdate.save()
 
             // update squad points 
-            const updateSquadPoints = await League.query().where(
+            const updateSquadPoints = await SquadPoints.query().where(
               { 
                 squad_id:currentPlayer.squad_id ,
                 week_season_id: currentweekSeason.id
               }).first()
 
               if (!updateSquadPoints) {
-                await League.findOrCreate(
+                await SquadPoints.findOrCreate(
                   { 
                     squad_id:currentPlayer.squad_id ,
                     week_season_id:  currentweekSeason.id,
@@ -78,15 +77,12 @@ class UpdateRankingFeature {
               }
         } 
     }
-
     try {
       // get today fixtures 
       // get players by fixtures
       // run each player by fixture 
       // update user stats 
       const getAllPlayerIds  = await Player.query().pluck("player_id")
-      const getPointSettings = await PointSetting.query().fetch()
-
       const fixturesBaseUrl = Config.get("rapidApi.getWeekFixturesEndpoint")
       const playerBaseUrl = Config.get("rapidApi.getFixturePlayers")
       const currentyear = new Date().getFullYear()-1;

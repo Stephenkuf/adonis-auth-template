@@ -9,8 +9,7 @@ class WeekSeasonsSchema extends Schema {
       table.increments()
       table.integer("week")
       table.integer("season")
-      table.boolean("is_current_week").defaultTo(1)
-      table.boolean("is_current_season").defaultTo(1)
+      table.boolean("is_current").defaultTo(1)
       table.timestamps()
     })
   }

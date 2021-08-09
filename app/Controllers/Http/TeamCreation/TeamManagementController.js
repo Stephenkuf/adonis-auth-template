@@ -18,7 +18,7 @@ const WeekSeason  = use("App/Models/WeekSeason");
 class TeamManagementController {
 
     async createTeam({ request , response, auth }){
-        const currentweekSeason  = await WeekSeason.query().where("is_current_week", 1).andWhere("is_current_season",  1).first()
+        const currentweekSeason  = await WeekSeason.query().where("is_current", 1).first()
 
         try {
             const user  = auth.current.user

@@ -1,6 +1,5 @@
 'use strict'
-
-const League = use("App/Models/League");
+const SquadPoints = use("App/Models/SquadPoint");
 const WeekSeason  = use("App/Models/WeekSeason");
 const TeamSquad  = use("App/Models/TeamSquad");
 const PlayerSquad  = use("App/Models/PlayerSquad");
@@ -9,9 +8,9 @@ class RankingController {
     async viewSquadRankings({response , auth }){
         try {
             const user = auth.current.user
-            const currentweekSeason  = await WeekSeason.query().where("is_current_week", 1).andWhere("is_current_season",  1).first()
+            const currentweekSeason  = await WeekSeason.query().where("is_current", 1).first()
 
-            const getWeeklyRanking =  await League.query()
+            const getWeeklyRanking =  await SquadPoints.query()
             .where("week_season_id", currentweekSeason.id)
             .with("squad" ,builder => builder.with("teamName"))
             .orderBy("points_total" , "desc")
@@ -37,10 +36,10 @@ class RankingController {
     async userTeamRankings({ response , auth }){
         try {
             const user = auth.current.user
-            const currentweekSeason  = await WeekSeason.query().where("is_current_week", 1).andWhere("is_current_season",  1).first()
+            const currentweekSeason  = await WeekSeason.query().where("is_current", 1).first()
             const userSquad  = await TeamSquad.query().where("user_id", user.id).first()
 
-            const teamWeekStats =  await League.query()
+            const teamWeekStats =  await SquadPoints.query()
             .where("squad_id",userSquad.id )
             .where("week_season_id", currentweekSeason.id)
             .with("squad" ,builder => builder.with("teamName"))

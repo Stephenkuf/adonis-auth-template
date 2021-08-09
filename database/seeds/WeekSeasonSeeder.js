@@ -18,8 +18,7 @@ let settings = [
   {
     week: 1,
     season:1,
-    is_current_week:1,
-    is_current_season:1
+    is_current:1,
   },
 ]
 
