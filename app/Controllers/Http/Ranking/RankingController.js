@@ -29,10 +29,9 @@ class RankingController {
                 status:"Internal Server Error", 
                 status_code:500, 
                 message: "There was an error fetchingRankings"
-             })  
+        })  
         }
     }
-
     async userTeamRankings({ response , auth }){
         try {
             const user = auth.current.user
@@ -74,7 +73,7 @@ class RankingController {
                 status:"Internal Server Error", 
                 status_code:500, 
                 message: "There was an error fetching Rankings"
-             }) 
+            }) 
         }
     }
 }

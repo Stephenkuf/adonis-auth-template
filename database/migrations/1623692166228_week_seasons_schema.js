@@ -10,6 +10,8 @@ class WeekSeasonsSchema extends Schema {
       table.integer("week")
       table.integer("season")
       table.boolean("is_current").defaultTo(1)
+      table.string("week_start_date")
+      table.string("week_end_date")
       table.timestamps()
     })
   }
