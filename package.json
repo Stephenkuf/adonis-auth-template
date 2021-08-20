@@ -32,10 +32,10 @@
     "adonis-auth-builder": "^1.0.3",
     "axios": "^0.21.1",
     "mysql": "^2.18.1",
+    "paystack-api": "^2.0.6",
     "safe-await": "^1.0.0",
     "url-parse": "^1.5.1"
   },
-  "devDependencies": {},
   "autoload": {
     "App": "./app"
   }

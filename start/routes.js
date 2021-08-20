@@ -38,3 +38,20 @@ Route.get("/viewUserProfile","TeamCreation/TeamManagementController.viewUserProf
 Route.get("/updateRankings","Metadata/MetadatumController.updateRanking").middleware(['auth'])
 Route.get("/viewSquadRankings","Ranking/RankingController.viewSquadRankings").middleware(['auth'])
 Route.get("/userTeamRanking","Ranking/RankingController.userTeamRankings").middleware(['auth'])
+
+/**
+ * Payment routes fro each payment gateway
+ */
+
+//paystack
+Route.get("/payment/paystack/get_banks","Payment/PaystackPaymentController.getBanks"); //no authentication needed for this
+Route.post("/payment/paystack/initiate_card_transaction","Payment/PaystackPaymentController.initiateCardTransaction").middleware(['auth']).validator("InitiateTransaction");
+Route.get("/payment/paystack/resolve_account_number","Payment/PaystackPaymentController.resolveAccountNumber").middleware(['auth']).validator("ResolveAccount");
+Route.post("/payment/paystack/verify_transaction","Payment/PaystackPaymentController.verifyPayment").middleware(['auth']).validator("ValidateTransaction");
+
+//stripe
+
+//not currently in use for now
+Route.get("/wallet_page","Transaction/TransactionController.walletPageData").middleware(['auth'])
+
+
