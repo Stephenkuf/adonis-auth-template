@@ -41,6 +41,40 @@ class LeagueStatus extends Task {
                     }
                 }
             });
+
+            //End League
+            let CheckLeaguesEnded = await Database.from('leagues').where({ league_status: 'ended' })
+            CheckLeaguesEnded.forEach(async function(item) {
+                if (item.league_status == 'ended') {
+                    let LeaguesTotalPrice = await Database.from('league_participants').where({ league_id: item.id }).andWhere('user_status', 1).getCount()
+                    let LeaguesParticipants = await Database.from('league_participants').where({ league_id: item.id }).andWhere('user_status', 1).orderBy('user_ponts', 'DESC').limit(3)
+                    let totalPrice = LeaguesTotalPrice * item.amount
+
+                    let first = totalPrice * 0.5
+                    let second = totalPrice * 0.3
+                    let thrd = totalPrice * 0.2
+
+                    console.log(LeaguesParticipants[0].user_id, totalPrice, first, second, thrd)
+                    if (item.league_winner_type == 'winner') {
+                        let user = await Database.from('users').where({ id: LeaguesParticipants[0].user_id }).first()
+                        await Database
+                            .table('users')
+                            .where('id', LeaguesParticipants[0].user_id)
+                            .update('wallet', user.wallet + totalPrice)
+                    }
+
+                    // if (item.league_winner_type == 'default') {
+                    //     LeaguesParticipants.forEach(async function(userData) {
+                    //         let user = await Database.from('users').where({ id: userData.user_id })
+                    //         await Database
+                    //             .table('users')
+                    //             .where('id', userData.user_id)
+                    //             .update('wallet', user.wallet + totalPrice)
+                    //     });
+                    // }
+
+                }
+            });
         } catch (error) {
             console.log(error)
         }
