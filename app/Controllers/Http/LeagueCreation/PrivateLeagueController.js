@@ -3,6 +3,7 @@
 const LeagueParticipantSchema = use("App/Models/LeagueParticipant");
 const League = use("App/Models/League");
 const User = use("App/Models/User");
+const SystemSettings = use('App/Models/SystemSetting')
 
 class PrivateLeagueController {
 
@@ -39,6 +40,16 @@ class PrivateLeagueController {
             }
 
 
+            //Check if league has started or ended
+            if (checkLeague.league_status == "started" || checkLeague.league_status == "ended") {
+                return response.status(400).json({
+                    status: "League has already started or ended",
+                    status_code: 400,
+                    message: `The League ${checkLeague.league_name} has already started or ended`
+                })
+            }
+
+
             //Check if is paid league            
             if (checkLeague.league_paid == 'Yes') {
                 //Check if user have enough balance in wallet
@@ -68,7 +79,7 @@ class PrivateLeagueController {
                 let JoinLeague = await LeagueParticipantSchema.create({
                     user_id: user.id,
                     league_id: checkLeague.id,
-                    participant_status: 1
+                    user_status: 1
                 })
 
                 return response.status(200).json({
@@ -80,8 +91,8 @@ class PrivateLeagueController {
                 })
             }
 
-            //If already join update participant_status to 1
-            getParticipant.participant_status = 1
+            //If already join update user_status to 1
+            getParticipant.user_status = 1
             getParticipant.save()
 
 
@@ -139,23 +150,33 @@ class PrivateLeagueController {
                 })
             }
 
+            //Check if league has already started and if you can leave league
+            let SystemSetting = await SystemSettings.first()
 
-            //Check if ia paid league            
+            if (SystemSetting.leave_league_in_between_league == 0) {
+                return response.status(400).json({
+                    status: "You can not Leave the league",
+                    status_code: 400,
+                    message: "The LEague has already been started, can not leave"
+                })
+            }
+
+            //Check if is paid league            
             if (checkLeague.league_paid == 'Yes') {
                 //deduct league fee from user wallet
                 if (!deductMoney(user.id, checkLeague.amount)) {
                     return response.status(400).json({
                         status: "Internal Server Error",
                         status_code: 400,
-                        message: "There was an error adding the League amount to user wallet"
+                        message: "There was an error adding the League amount paid to user wallet"
                     })
                 }
             }
 
 
-            //Update user participant_status to 0
+            //Update user user_status to 0
             let getParticipant = await LeagueParticipantSchema.query().where("league_id", checkLeague.id).andWhere("user_id", user.id).first()
-            getParticipant.participant_status = 0
+            getParticipant.user_status = 0
             getParticipant.save()
 
 

@@ -3,6 +3,7 @@
 const League = use("App/Models/League");
 const WeekSeason = use("App/Models/WeekSeason");
 const randomString = require("randomstring");
+const Database = use('Database')
 
 
 class LeagueCreationController {
@@ -17,19 +18,6 @@ class LeagueCreationController {
 
             //Validate Request
             let { league_name } = request.all()
-
-
-            //Check if Leageue Name Already Exist
-            // const checkLeagueName = await League.query().where("name", name).first()
-
-            // if (checkLeagueName) {
-            //     return response.status(400).json({
-            //         results: checkLeagueName,
-            //         status: "Error",
-            //         status_code: 400,
-            //         message: "League Name has already exist"
-            //     })
-            // }
 
             //Generate league unique invite code
             let league_invite_code = randomString.generate({
@@ -64,7 +52,6 @@ class LeagueCreationController {
         }
 
     }
-
 
     //League Settings
     async leagueSettings({ request, response, auth }) {
@@ -108,7 +95,6 @@ class LeagueCreationController {
 
     }
 
-
     //League Weeks
     async leagueWeeks({ response, auth }) {
 
@@ -134,6 +120,44 @@ class LeagueCreationController {
 
     }
 
+    //League Participant Ranking
+    async leagueParticipantRanking({ response, params, auth }) {
+
+        try {
+            //Get League ID
+            let leagueId = params
+
+            //Check League
+            const checkLeague = await League.find(leagueId.league_id)
+
+            if (!checkLeague) {
+                return response.status(404).json({
+                    status: "League not found",
+                    status_code: 404,
+                    message: `The League with ID ${leagueId.league_id} not found`
+                })
+            }
+
+            let getLeagueParticipants = await Database.from('league_participants').where({ league_id: leagueId.league_id }).orderBy('user_ranking', 'ASC')
+            return response.status(200).json({
+                result: getLeagueParticipants,
+                label: `League Participants Ranking`,
+                statusCode: 200,
+                message: `League ${checkLeague.league_name} Participants Ranking`,
+            })
+
+        } catch (error) {
+            console.log(error)
+            return response.status(500).json({
+                error: error,
+                status: "Internal Server Error",
+                status_code: 500,
+                message: "There was an error fetching League weeks"
+            })
+
+        }
+
+    }
 
 }
 

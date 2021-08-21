@@ -44,6 +44,7 @@ Route.get("/userTeamRanking", "Ranking/RankingController.userTeamRankings").midd
 Route.post("/createLeague", "LeagueCreation/LeagueCreationController.createLeague").validator("LeagueCreation").middleware(['auth'])
 Route.post("/leagueSettings", "LeagueCreation/LeagueCreationController.leagueSettings").validator("LeagueSettings").middleware(['auth'])
 Route.get("/leagueWeeks", "LeagueCreation/LeagueCreationController.leagueWeeks").middleware(['auth'])
+Route.get("/leagueParticipantRanking/:league_id", "LeagueCreation/LeagueCreationController.leagueParticipantRanking").middleware(['auth'])
 
 //Join Public League
 Route.get("/joinPublicLeague/:league_id", "LeagueCreation/PublicLeagueController.joinLeague").middleware(['auth'])

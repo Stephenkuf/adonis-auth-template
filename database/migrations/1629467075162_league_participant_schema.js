@@ -9,8 +9,9 @@ class LeagueParticipantSchema extends Schema {
             table.increments()
             table.integer("user_id").notNullable()
             table.integer("league_id").notNullable()
-            table.integer("participant_position")
-            table.boolean("participant_status").comment('0 represents when a participant left, while 1 represents the participant is active')
+            table.integer("user_ponts")
+            table.integer("user_ranking")
+            table.boolean("user_status").comment('0 represents when a participant left, while 1 represents the participant is active')
             table.timestamps()
         })
     }

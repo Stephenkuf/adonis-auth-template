@@ -30,8 +30,11 @@
     "@adonisjs/mail": "^3.0.10",
     "@adonisjs/validator": "^5.0.6",
     "adonis-auth-builder": "^1.0.3",
+    "adonis-scheduler": "^3.0.2",
     "axios": "^0.21.1",
+    "cron": "^1.8.2",
     "mysql": "^2.18.1",
+    "node-schedule": "^2.0.0",
     "safe-await": "^1.0.0",
     "url-parse": "^1.5.3"
   },
