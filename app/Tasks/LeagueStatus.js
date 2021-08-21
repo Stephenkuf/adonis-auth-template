@@ -52,26 +52,31 @@ class LeagueStatus extends Task {
 
                     let first = totalPrice * 0.5
                     let second = totalPrice * 0.3
-                    let thrd = totalPrice * 0.2
+                    let third = totalPrice * 0.2
+                    let position = [first, second, third]
 
-                    console.log(LeaguesParticipants[0].user_id, totalPrice, first, second, thrd)
-                    if (item.league_winner_type == 'winner') {
-                        let user = await Database.from('users').where({ id: LeaguesParticipants[0].user_id }).first()
-                        await Database
-                            .table('users')
-                            .where('id', LeaguesParticipants[0].user_id)
-                            .update('wallet', user.wallet + totalPrice)
+                    //Top Three
+                    if (item.league_winner_type == 'default') {
+                        /* this is an example for new snippet extension make by me xD */
+                        for (let index = 0; index < LeaguesParticipants.length; index++) {
+                            console.log(LeaguesParticipants[index].user_id, position[index])
+                            let userBalance = await Database.from('wallets').where({ user_id: LeaguesParticipants[index].user_id }).first()
+                            await Database
+                                .table('wallets')
+                                .where('user_id', LeaguesParticipants[index].user_id)
+                                .update('balance', userBalance.wallet + position[index])
+                        }
                     }
 
-                    // if (item.league_winner_type == 'default') {
-                    //     LeaguesParticipants.forEach(async function(userData) {
-                    //         let user = await Database.from('users').where({ id: userData.user_id })
-                    //         await Database
-                    //             .table('users')
-                    //             .where('id', userData.user_id)
-                    //             .update('wallet', user.wallet + totalPrice)
-                    //     });
-                    // }
+                    //Winner takes all
+                    if (item.league_winner_type == 'winner') {
+                        let userBalance = await Database.from('wallets').where({ user_id: LeaguesParticipants[index].user_id }).first()
+                        await Database
+                            .table('wallets')
+                            .where('user_id', LeaguesParticipants[0].user_id)
+                            .update('balance', userBalance.balance + totalPrice)
+                    }
+
 
                 }
             });

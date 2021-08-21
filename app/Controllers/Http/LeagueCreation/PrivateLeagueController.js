@@ -4,17 +4,23 @@ const LeagueParticipantSchema = use("App/Models/LeagueParticipant");
 const League = use("App/Models/League");
 const User = use("App/Models/User");
 const SystemSettings = use('App/Models/SystemSetting')
+const Database = use('Database')
 
 class PrivateLeagueController {
 
     //Join Private League
     async joinLeague({ request, response, auth }) {
+        //Auth User
+        const user = auth.current.user
+
+        //Get User Wallet
+        const userWallet = await Database.from('wallets').where({ user_id: user.id })
+
         //User Wallet Handling    
-        async function addMoney(userId, amount) {
+        async function deductMoney(amount) {
             try {
-                let userData = await User.find(userId)
-                userData.wallet = userData.wallet - amount
-                userData.save()
+                userWallet.balance = userWallet.balance - amount
+                userWallet.save()
                 return true
             } catch (error) {
                 return false
@@ -22,9 +28,6 @@ class PrivateLeagueController {
         }
 
         try {
-            //Auth User
-            const user = auth.current.user
-
             //Get League Invite Code
             let { league_code, league_id } = request.all()
 
@@ -39,7 +42,6 @@ class PrivateLeagueController {
                 })
             }
 
-
             //Check if league has started or ended
             if (checkLeague.league_status == "started" || checkLeague.league_status == "ended") {
                 return response.status(400).json({
@@ -49,11 +51,10 @@ class PrivateLeagueController {
                 })
             }
 
-
             //Check if is paid league            
             if (checkLeague.league_paid == 'Yes') {
                 //Check if user have enough balance in wallet
-                if (checkLeague.amount > user.wallet) {
+                if (checkLeague.amount > userWallet.balance) {
                     return response.status(400).json({
                         status: "no sufficient fund",
                         status_code: 400,
@@ -62,7 +63,7 @@ class PrivateLeagueController {
                 }
 
                 //deduct league fee from user wallet
-                if (!addMoney(user.id, checkLeague.amount)) {
+                if (!deductMoney(user.id, checkLeague.amount)) {
                     return response.status(400).json({
                         status: "Internal Server Error",
                         status_code: 400,
@@ -120,12 +121,17 @@ class PrivateLeagueController {
 
     //Leave Private League
     async leaveLeague({ request, response, auth }) {
+        //Auth User
+        const user = auth.current.user
+
+        //Get User Wallet
+        const userWallet = await Database.from('wallets').where({ user_id: user.id })
+
         //User Wallet Handling    
-        async function deductMoney(userId, amount) {
+        async function addMoney(amount) {
             try {
-                let userData = await User.find(userId)
-                userData.wallet = userData.wallet + amount
-                userData.save()
+                userWallet.balance = userWallet.balance + amount
+                userWallet.save()
                 return true
             } catch (error) {
                 return false
@@ -133,9 +139,6 @@ class PrivateLeagueController {
         }
 
         try {
-            //Auth User
-            const user = auth.current.user
-
             //Get League Invite Code
             let { league_code, league_id } = request.all()
 
@@ -153,18 +156,20 @@ class PrivateLeagueController {
             //Check if league has already started and if you can leave league
             let SystemSetting = await SystemSettings.first()
 
-            if (SystemSetting.leave_league_in_between_league == 0) {
-                return response.status(400).json({
-                    status: "You can not Leave the league",
-                    status_code: 400,
-                    message: "The LEague has already been started, can not leave"
-                })
+            if (SystemSetting) {
+                if (SystemSetting.leave_league_in_between_league == 0) {
+                    return response.status(400).json({
+                        status: "You can not Leave the league",
+                        status_code: 400,
+                        message: "The LEague has already been started, can not leave"
+                    })
+                }
             }
 
             //Check if is paid league            
             if (checkLeague.league_paid == 'Yes') {
                 //deduct league fee from user wallet
-                if (!deductMoney(user.id, checkLeague.amount)) {
+                if (!addMoney(checkLeague.amount)) {
                     return response.status(400).json({
                         status: "Internal Server Error",
                         status_code: 400,

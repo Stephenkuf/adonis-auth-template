@@ -35,7 +35,6 @@ Route.put("/editTeam", "TeamCreation/TeamManagementController.editTeam").middlew
 Route.get("/viewUserTeam", "TeamCreation/TeamManagementController.viewUserTeam").middleware(['auth'])
 Route.get("/viewUserProfile", "TeamCreation/TeamManagementController.viewUserProfile").middleware(['auth'])
 
-<<<<<<< HEAD
 Route.get("/updateRankings", "Metadata/MetadatumController.updateRanking").middleware(['auth'])
 Route.get("/viewSquadRankings", "Ranking/RankingController.viewSquadRankings").middleware(['auth'])
 Route.get("/userTeamRanking", "Ranking/RankingController.userTeamRankings").middleware(['auth'])
@@ -43,7 +42,7 @@ Route.get("/userTeamRanking", "Ranking/RankingController.userTeamRankings").midd
 
 //League Creation
 Route.post("/createLeague", "LeagueCreation/LeagueCreationController.createLeague").validator("LeagueCreation").middleware(['auth'])
-Route.post("/leagueSettings", "LeagueCreation/LeagueCreationController.leagueSettings").validator("LeagueSettings").middleware(['auth'])
+Route.put("/leagueSettings", "LeagueCreation/LeagueCreationController.leagueSettings").validator("LeagueSettings").middleware(['auth'])
 Route.get("/leagueWeeks", "LeagueCreation/LeagueCreationController.leagueWeeks").middleware(['auth'])
 Route.get("/leagueParticipantRanking/:league_id", "LeagueCreation/LeagueCreationController.leagueParticipantRanking").middleware(['auth'])
 
@@ -51,32 +50,10 @@ Route.get("/leagueParticipantRanking/:league_id", "LeagueCreation/LeagueCreation
 Route.get("/joinPublicLeague/:league_id", "LeagueCreation/PublicLeagueController.joinLeague").middleware(['auth'])
 
 //Leave Public League
-Route.get("/leavePublicFreeLeague/:league_id", "LeagueCreation/LeaveLeagueController.leaveFreePublicLeague").middleware(['auth'])
+Route.get("/leavePublicLeague/:league_id", "LeagueCreation/PublicLeagueController.leaveLeague").middleware(['auth'])
 
 //Join Private League
 Route.post("/joinPrivateLeague", "LeagueCreation/PrivateLeagueController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
 
 //Leave Private League
-Route.post("/leavePrivateFreeLeague", "LeagueCreation/PrivateLeagueController.leaveFreePublicLeague").validator("JoinPrivateLeague").middleware(['auth'])
-=======
-Route.get("/updateRankings","Metadata/MetadatumController.updateRanking").middleware(['auth'])
-Route.get("/viewSquadRankings","Ranking/RankingController.viewSquadRankings").middleware(['auth'])
-Route.get("/userTeamRanking","Ranking/RankingController.userTeamRankings").middleware(['auth'])
-
-/**
- * Payment routes fro each payment gateway
- */
-
-//paystack
-Route.get("/payment/paystack/get_banks","Payment/PaystackPaymentController.getBanks"); //no authentication needed for this
-Route.post("/payment/paystack/initiate_card_transaction","Payment/PaystackPaymentController.initiateCardTransaction").middleware(['auth']).validator("InitiateTransaction");
-Route.get("/payment/paystack/resolve_account_number","Payment/PaystackPaymentController.resolveAccountNumber").middleware(['auth']).validator("ResolveAccount");
-Route.post("/payment/paystack/verify_transaction","Payment/PaystackPaymentController.verifyPayment").middleware(['auth']).validator("ValidateTransaction");
-
-//stripe
-
-//not currently in use for now
-Route.get("/wallet_page","Transaction/TransactionController.walletPageData").middleware(['auth'])
-
-
->>>>>>> 842d7dd4ad2c01ea099e11c96e253d2e28dd988c
+Route.post("/leavePrivateLeague", "LeagueCreation/PrivateLeagueController.leaveLeague").validator("JoinPrivateLeague").middleware(['auth'])

@@ -4,17 +4,23 @@ const LeagueParticipantSchema = use("App/Models/LeagueParticipant");
 const League = use("App/Models/League");
 const User = use("App/Models/User");
 const SystemSettings = use('App/Models/SystemSetting')
+const Database = use('Database')
 
 class PublicLeagueController {
 
     //Join Public League
     async joinLeague({ response, params, auth }) {
+        //Auth User
+        const user = auth.current.user
+
+        //Get User Wallet
+        const userWallet = await Database.from('wallets').where({ user_id: user.id })
+
         //User Wallet Handling    
-        async function addMoney(userId, amount) {
+        async function deductMoney(amount) {
             try {
-                let userData = await User.find(userId)
-                userData.wallet = userData.wallet - amount
-                userData.save()
+                userWallet.balance = userWallet.balance - amount
+                userWallet.save()
                 return true
             } catch (error) {
                 return false
@@ -51,7 +57,8 @@ class PublicLeagueController {
             //Check if is paid league            
             if (checkLeague.league_paid == 'Yes') {
                 //Check if user have enough balance in wallet
-                if (checkLeague.amount > user.wallet) {
+                console.log(userWallet.balance, userWallet, checkLeague.amount)
+                if (checkLeague.amount > userWallet.balance) {
                     return response.status(400).json({
                         status: "no sufficient fund",
                         status_code: 400,
@@ -60,7 +67,7 @@ class PublicLeagueController {
                 }
 
                 //deduct league fee from user wallet
-                if (addMoney(user.id, checkLeague.amount)) {
+                if (deductMoney(checkLeague.amount)) {
                     return response.status(400).json({
                         // error: error,
                         status: "Internal Server Error",
@@ -120,12 +127,17 @@ class PublicLeagueController {
 
     //Leave Public League
     async leaveLeague({ response, params, auth }) {
-        //User Wallet Handling    
-        async function deductMoney(userId, amount) {
+        //Auth User
+        const user = auth.current.user
+
+        //Get User Wallet
+        const userWallet = await Database.from('wallets').where({ user_id: user.id })
+
+        //User Wallet Handling
+        async function addMoney(amount) {
             try {
-                let userData = await User.find(userId)
-                userData.wallet = userData.wallet + amount
-                userData.save()
+                userWallet.balance = userWallet.balance + amount
+                userWallet.save()
                 return true
             } catch (error) {
                 return false
@@ -133,8 +145,6 @@ class PublicLeagueController {
         }
 
         try {
-            //Auth User
-            const user = auth.current.user
 
             //Get League ID
             let leagueId = params
@@ -161,20 +171,21 @@ class PublicLeagueController {
 
             //Check if league has already started and if you can leave league
             let SystemSetting = await SystemSettings.first()
-
-            if (SystemSetting.leave_league_in_between_league == 0) {
-                return response.status(400).json({
-                    status: "You can not Leave the league",
-                    status_code: 400,
-                    message: "The LEague has already been started, can not leave"
-                })
+            if (SystemSetting) {
+                if (SystemSetting.leave_league_in_between_league == 0) {
+                    return response.status(400).json({
+                        status: "You can not Leave the league",
+                        status_code: 400,
+                        message: "The LEague has already been started, can not leave"
+                    })
+                }
             }
 
             //Check if is paid league            
             if (checkLeague.league_paid == 'Yes') {
 
                 //deduct league fee from user wallet
-                if (deductMoney(user.id, checkLeague.amount)) {
+                if (addMoney(user.id, checkLeague.amount)) {
                     return response.status(400).json({
                         error: error,
                         status: "Internal Server Error",
