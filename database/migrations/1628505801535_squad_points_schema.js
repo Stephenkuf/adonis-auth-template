@@ -9,7 +9,7 @@ class SquadPointsSchema extends Schema {
       table.increments()
       table.integer("squad_id")
       table.integer("week_season_id")
-      table.integer("points_total")
+      table.integer("points_total").default(0)
       table.timestamps()
     })
   }

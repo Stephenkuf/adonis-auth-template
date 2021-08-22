@@ -23,9 +23,9 @@ class UpdateRankingFeature {
     async function updatePlayerScores(paramType , playerInfo){
       // get points for goals for player
 
-     const currentweekSeason  = await WeekSeason.query().where("is_current", 1).first()
+    const currentweekSeason  = await WeekSeason.query().where("is_current", 1).first()
     //  Get all player in squads with id passed 
-     const playerToUpdate =  await PlayerSquad.query()
+    const playerToUpdate =  await PlayerSquad.query()
         .where({
           player_id:playerInfo[0],
           week_season_id: currentweekSeason.id

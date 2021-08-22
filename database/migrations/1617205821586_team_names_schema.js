@@ -9,6 +9,8 @@ class TeamNamesSchema extends Schema {
       table.increments()
       table.integer("user_id")
       table.string("team_name")
+      table.boolean("is_active").defaultTo(1)
+      table.boolean("is_deleted").defaultTo(0)
       table.timestamps()
     })
   }
