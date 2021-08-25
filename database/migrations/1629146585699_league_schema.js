@@ -5,7 +5,6 @@ const Schema = use('Schema')
 
 class LeagueSchema extends Schema {
     up() {
-        this.drop('leagues')
         this.create('leagues', (table) => {
             table.increments()
             table.integer("user_id").notNullable()
