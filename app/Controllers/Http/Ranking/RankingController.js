@@ -81,12 +81,13 @@ class RankingController {
             });
 
             let userWeekPosition = 0;
+            
             for (let i = 0; i < sortByPoints.length; i++) { 
                 if (sortByPoints[i].squad_id == userSquad.id) {
                     userWeekPosition = i + 1
                 }
             }
-            
+
             return response.status(200).json({
                 result:{
                     overallPoints:overallPoints,
