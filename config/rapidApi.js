@@ -23,5 +23,17 @@ module.exports = {
 
   getStatsByFixtures:
   "https://api-football-v1.p.rapidapi.com/v3/fixtures",
+  
+  getCountries:
+  "https://api-football-v1.p.rapidapi.com/v3/countries",
+  
+  getLeagueByCountryName:
+  "https://api-football-v1.p.rapidapi.com/v3/leagues",
+
+  getLeagueFixturesBetweenTwoDates: 
+  "https://api-football-v1.p.rapidapi.com/v3/fixtures",
+
+  getGamePlayersByFixturesId: 
+  "https://api-football-v1.p.rapidapi.com/v3/fixtures/players",
 }
 

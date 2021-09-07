@@ -51,6 +51,8 @@ class PrivateLeagueController {
                 })
             }
 
+            
+
             //Check if is paid league            
             if (checkLeague.league_paid == 'Yes') {
                 //Check if user have enough balance in wallet

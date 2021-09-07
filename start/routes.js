@@ -40,20 +40,30 @@ Route.get("/viewSquadRankings", "Ranking/RankingController.viewSquadRankings").m
 Route.get("/userTeamRanking", "Ranking/RankingController.userTeamRankings").middleware(['auth'])
 
 
+Route.get("/test", "SystemLeague/SystemLeagueController.test")
+Route.get("/countries", "SystemLeague/SystemLeagueController.getSystemCountries")
+Route.get("/leaguesByCountryName/:country_name", "SystemLeague/SystemLeagueController.getLeagueByCountryName")
+Route.get("/getAllSystemLeagues", "SystemLeague/SystemLeagueController.getAllSystemLeagues")
+Route.get("/getLeagueFixturesBetweenTwoDates/:league/:season/:from/:to", "SystemLeague/SystemLeagueController.getLeagueFixturesBetweenTwoDates")
+
+
 //League Creation
-Route.post("/createLeague", "LeagueCreation/LeagueCreationController.createLeague").validator("LeagueCreation").middleware(['auth'])
-Route.put("/leagueSettings", "LeagueCreation/LeagueCreationController.leagueSettings").validator("LeagueSettings").middleware(['auth'])
-Route.get("/leagueWeeks", "LeagueCreation/LeagueCreationController.leagueWeeks").middleware(['auth'])
-Route.get("/leagueParticipantRanking/:league_id", "LeagueCreation/LeagueCreationController.leagueParticipantRanking").middleware(['auth'])
+Route.post("/createLeague", "League/LeagueCreationController.createLeague").validator("LeagueCreation").middleware(['auth'])
+Route.put("/leagueSettings", "League/LeagueCreationController.leagueSettings").validator("LeagueSettings").middleware(['auth'])
+Route.get("/leagueWeeks", "League/LeagueCreationController.leagueWeeks").middleware(['auth'])
+Route.get("/leagueParticipantRanking/:league_id", "League/LeagueCreationController.leagueParticipantRanking").middleware(['auth'])
+
+//Join League With Code
+Route.post("/joinLeagueWithcode", "League/LeagueSettingController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
 
 //Join Public League
-Route.get("/joinPublicLeague/:league_id", "LeagueCreation/PublicLeagueController.joinLeague").middleware(['auth'])
+Route.get("/joinPublicLeague/:league_id", "League/PublicLeagueController.joinLeague").middleware(['auth'])
 
 //Leave Public League
-Route.get("/leavePublicLeague/:league_id", "LeagueCreation/PublicLeagueController.leaveLeague").middleware(['auth'])
+Route.get("/leavePublicLeague/:league_id", "League/PublicLeagueController.leaveLeague").middleware(['auth'])
 
 //Join Private League
-Route.post("/joinPrivateLeague", "LeagueCreation/PrivateLeagueController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
+Route.post("/joinPrivateLeague", "League/PrivateLeagueController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
 
 //Leave Private League
-Route.post("/leavePrivateLeague", "LeagueCreation/PrivateLeagueController.leaveLeague").validator("JoinPrivateLeague").middleware(['auth'])
+Route.post("/leavePrivateLeague", "League/PrivateLeagueController.leaveLeague").validator("JoinPrivateLeague").middleware(['auth'])
