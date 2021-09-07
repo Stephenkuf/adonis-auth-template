@@ -50,7 +50,7 @@ Route.get("/getLeagueFixturesBetweenTwoDates/:league/:season/:from/:to", "System
 //League Creation
 Route.post("/createLeague", "League/LeagueCreationController.createLeague").validator("LeagueCreation").middleware(['auth'])
 Route.put("/leagueSettings", "League/LeagueCreationController.leagueSettings").validator("LeagueSettings").middleware(['auth'])
-Route.get("/leagueWeeks", "League/LeagueCreationController.leagueWeeks").middleware(['auth'])
+// Route.get("/leagueWeeks", "League/LeagueCreationController.leagueWeeks").middleware(['auth'])
 Route.get("/leagueParticipantRanking/:league_id", "League/LeagueCreationController.leagueParticipantRanking").middleware(['auth'])
 
 //Join League With Code

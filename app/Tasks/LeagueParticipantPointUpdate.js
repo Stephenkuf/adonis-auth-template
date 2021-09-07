@@ -30,7 +30,7 @@ class LeagueParticipantPointUpdate extends Task {
                             .table('league_participants')
                             .where('user_id', point.squad_id)
                             .andWhere('league_id', item.id)
-                            .update('user_ponts', sum)
+                            .update('user_points', sum)
                     });
                 });
             });

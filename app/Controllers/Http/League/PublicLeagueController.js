@@ -160,6 +160,7 @@ class PublicLeagueController {
                     playerIdArray.push(playerDetailsArray[i][j].player.id);
                 }
             }
+
             if(!checker(playerIdArray, playerIds)){
                 let difference = playerIds.filter(x => !playerIdArray.includes(x));
                 return response.status(200).json({
@@ -169,7 +170,6 @@ class PublicLeagueController {
                     statusCode: 200,
                     message: `You have players that is not amoung the game fixtures in your team`,
                 })
-
             }
 
             return response.status(200).json({
