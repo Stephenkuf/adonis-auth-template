@@ -59,14 +59,17 @@ Route.post("/joinLeagueWithcode", "League/LeagueSettingController.joinLeagueWith
 //Join League
 Route.get("/joinLeague/:league_id/:team_id", "League/LeagueSettingController.joinLeague").middleware(['auth'])
 
-//Join Public League
-Route.get("/joinPublicLeague/:league_id", "League/PublicLeagueController.joinLeague").middleware(['auth'])
+//Leave League
+Route.get("/leaveLeague/:league_id/:team_id", "League/LeagueSettingController.leaveLeague").middleware(['auth'])
 
-//Leave Public League
-Route.get("/leavePublicLeague/:league_id", "League/PublicLeagueController.leaveLeague").middleware(['auth'])
+// //Join Public League
+// Route.get("/joinPublicLeague/:league_id", "League/PublicLeagueController.joinLeague").middleware(['auth'])
 
-//Join Private League
-Route.post("/joinPrivateLeague", "League/PrivateLeagueController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
+// //Leave Public League
+// Route.get("/leavePublicLeague/:league_id", "League/PublicLeagueController.leaveLeague").middleware(['auth'])
 
-//Leave Private League
-Route.post("/leavePrivateLeague", "League/PrivateLeagueController.leaveLeague").validator("JoinPrivateLeague").middleware(['auth'])
+// //Join Private League
+// Route.post("/joinPrivateLeague", "League/PrivateLeagueController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
+
+// //Leave Private League
+// Route.post("/leavePrivateLeague", "League/PrivateLeagueController.leaveLeague").validator("JoinPrivateLeague").middleware(['auth'])

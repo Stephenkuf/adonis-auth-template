@@ -8,8 +8,10 @@ const PlayerSquad = use("App/Models/PlayerSquad");
 const Config = use("Config");
 const makeExternalRequestFeature = use("App/Features/MakeExternalRequestFeature");
 const Wallet = use("App/Models/Wallet");
+const SystemSettings = use('App/Models/SystemSetting')
 
 class LeagueSettingController {
+
     //Join League With Code
     async joinLeagueWithCode({
         request,
@@ -86,7 +88,7 @@ class LeagueSettingController {
             }
 
             //Get all Squad Player
-            const playerIds = [19465]
+            const playerIds = []
             const teamPlayerSquad = await Database.from('player_squads').where({
                 squad_id: checkSquad.id
             })
@@ -212,7 +214,7 @@ class LeagueSettingController {
                     message: `League Joined Successfully`,
                 })
             }
-            
+
             //Deduct Momet From User Wallet
             if (checkLeague.league_paid == 1) {
                 userWallet.balance = userWallet.balance - checkLeague.amount
@@ -245,7 +247,6 @@ class LeagueSettingController {
         }
 
     }
-
 
     //Join League    
     async joinLeague({
@@ -481,6 +482,109 @@ class LeagueSettingController {
                 label: "Internal Server Error",
                 status_code: 500,
                 message: "There was an error joining the Private League"
+            })
+
+        }
+
+    }
+
+
+    //Leave Public League
+    async leaveLeague({
+        response,
+        params,
+        auth
+    }) {
+        //Auth User
+        const user = auth.current.user
+
+        //Get User Wallet
+        const userWallet = await Wallet.query().where("user_id", user.id).first()
+
+        try {
+
+            //Get League ID
+            let {
+                league_id,
+                team_id
+            } = params
+            //Check League
+            const checkLeague = await League.find(league_id)
+
+            if (!checkLeague) {
+                return response.status(404).json({
+                    status: "League not found",
+                    status_code: 404,
+                    message: `The League with ID ${league_id} not found`
+                })
+            }
+
+            //Check if league has been ended
+            if (checkLeague.league_status == "ended") {
+                return response.status(400).json({
+                    status: "League has been ended",
+                    status_code: 400,
+                    message: `The League ${checkLeague.league_name} has been ended`
+                })
+            }
+
+            //Check if league has already started and if you can leave league
+            let SystemSetting = await SystemSettings.first()
+            if (SystemSetting) {
+                if (SystemSetting.leave_league_in_between_league == 0) {
+                    return response.status(400).json({
+                        status: "You can not Leave the league",
+                        status_code: 400,
+                        message: "The LEague has already been started, can not leave"
+                    })
+                }
+            }
+            //Check if user already joined
+            let getParticipant = await LeagueParticipantSchema.query().where("league_id", checkLeague.id).andWhere("user_id", user.id).andWhere("team_id", team_id).first()
+            if (!getParticipant) {
+                return response.status(400).json({
+                    label: "User Record not found for this league",
+                    status_code: 400,
+                    message: `The User  ${user.id} with League ID ${league_id} and Team ID ${team_id} is not found`
+                })
+            }
+
+            if(getParticipant.user_status == 0){
+                return response.status(400).json({
+                    label: "User Already left LEague",
+                    status_code: 400,
+                    message: `The User  ${user.id} with League ID ${league_id} and Team ID ${team_id} has already left the league`
+                })
+            }
+
+
+            //Check if is paid league            
+            if (checkLeague.league_paid == 1) {
+                userWallet.balance = userWallet.balance + checkLeague.amount
+                userWallet.save()
+            }
+            
+            //Update user user_status to 0
+            getParticipant.user_status = 0
+            getParticipant.save()
+
+
+            return response.status(200).json({
+                result: getParticipant,
+                user: user.id,
+                label: `League Left`,
+                statusCode: 200,
+                message: `League Left Successfully`,
+            })
+
+
+        } catch (error) {
+            console.log(error)
+            return response.status(500).json({
+                error: error,
+                status: "Internal Server Error",
+                status_code: 500,
+                message: "There was an error leaving the League"
             })
 
         }
