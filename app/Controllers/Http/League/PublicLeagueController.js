@@ -126,7 +126,6 @@ class PublicLeagueController {
             }
 
             //Get League Fixtures ID
-
             for (let n = 0; n < allLeagueId.length; n++) {
                 // console.log(allLeagueId[n], season, checkLeague.league_start_date, checkLeague.league_end_date)                
                 const baseUrl = Config.get("rapidApi.getLeagueFixturesBetweenTwoDates")

@@ -54,7 +54,10 @@ Route.get("/leagueWeeks", "League/LeagueCreationController.leagueWeeks").middlew
 Route.get("/leagueParticipantRanking/:league_id", "League/LeagueCreationController.leagueParticipantRanking").middleware(['auth'])
 
 //Join League With Code
-Route.post("/joinLeagueWithcode", "League/LeagueSettingController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
+Route.post("/joinLeagueWithcode", "League/LeagueSettingController.joinLeagueWithCode").validator("joinLeagueWithCode").middleware(['auth'])
+
+//Join League
+Route.get("/joinLeague/:league_id/:team_id", "League/LeagueSettingController.joinLeague").middleware(['auth'])
 
 //Join Public League
 Route.get("/joinPublicLeague/:league_id", "League/PublicLeagueController.joinLeague").middleware(['auth'])

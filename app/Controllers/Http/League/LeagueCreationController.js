@@ -96,6 +96,15 @@ class LeagueCreationController {
             //Check and Fetch League
             let getLeague = await League.query().where('user_id', user.id).andWhere('id', league_id).first()
 
+            //If League not exist
+            if(!getLeague){
+                return response.status(400).json({
+                    status: "The League is not found",
+                    status_code: 400,
+                    message: `The League with ID ${league_id} is not found`
+                })
+            }
+
             //Save
             getLeague.league_type = league_type
             getLeague.league_start_date = league_start_date
