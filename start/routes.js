@@ -65,15 +65,3 @@ Route.get("/leaveLeague/:league_id/:team_id", "League/LeagueSettingController.le
 //Leave Comment
 Route.post("/leagueComment", "League/LeagueSettingController.leagueComment").validator("leagueComment").middleware(['auth'])
 Route.get("/leagueComment/:league_id", "League/LeagueSettingController.getLeagueComment").middleware(['auth'])
-
-// //Join Public League
-// Route.get("/joinPublicLeague/:league_id", "League/PublicLeagueController.joinLeague").middleware(['auth'])
-
-// //Leave Public League
-// Route.get("/leavePublicLeague/:league_id", "League/PublicLeagueController.leaveLeague").middleware(['auth'])
-
-// //Join Private League
-// Route.post("/joinPrivateLeague", "League/PrivateLeagueController.joinLeague").validator("JoinPrivateLeague").middleware(['auth'])
-
-// //Leave Private League
-// Route.post("/leavePrivateLeague", "League/PrivateLeagueController.leaveLeague").validator("JoinPrivateLeague").middleware(['auth'])

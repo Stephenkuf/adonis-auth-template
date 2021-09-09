@@ -676,7 +676,7 @@ class LeagueSettingController {
 
     //Get League Comment
     async getLeagueComment({
-        request,
+        params,
         response,
         auth
     }){
@@ -690,9 +690,7 @@ class LeagueSettingController {
             //Get League Invite Code
             let {
                 league_id,
-                team_id,
-                comment
-            } = request.all()
+            } = params
 
             //Check League with league code
             const checkLeague = await League.query().where("id", league_id).first()
@@ -705,50 +703,13 @@ class LeagueSettingController {
                 })
             }
 
-            //Check if league has started or ended
-            if (checkLeague.league_status != "ended") {
-                return response.status(400).json({
-                    label: "League has not ended yet",
-                    status_code: 400,
-                    message: `The League ${checkLeague.league_name} has ended yet`
-                })
-            }
-
-            //Check if the Squad ID Exist
-            const checkSquad = await TeamSquad.query().where("user_id", user.id).andWhere("team_name_id", team_id).first()
-            if (!checkSquad) {
-                return response.status(400).json({
-                    label: "Team not found",
-                    status_code: 400,
-                    message: `The Team with ID ${team_id} not found`
-                })
-            }
-
-            //Check if user already joined
-            let getParticipant = await LeagueParticipantSchema.query().where("league_id", checkLeague.id).andWhere("user_id", user.id).andWhere("team_id", team_id).first()
-            if (!getParticipant.user_status) {
-                return response.status(400).json({
-                    label: "You are not a participant of the League",
-                    status_code: 400,
-                    message: `The User is not a participant of ${checkLeague.league_name} league`
-                })
-            }
-
-            //Save Comment
-            let saveComment = await leagueComment.create({
-                league_id: checkLeague.id,
-                user_id: user.id,
-                team_id: checkSquad.id,
-                date: new Date(),
-                comment: comment
-            })
-            
+            const allComments = await Database.table('league_comments').where('league_id', checkLeague.id).orderBy('created_at', 'desc')
 
             return response.status(200).json({
-                result: saveComment,
-                label: `Comment Saved`,
+                result: allComments,
+                label: `League Comments`,
                 statusCode: 200,
-                message: `League Comment Saved Successfully`,
+                message: `League Comment Fetched Successfully`,
             })
 
             
@@ -758,7 +719,7 @@ class LeagueSettingController {
                 error: error,
                 label: "Internal Server Error",
                 status_code: 500,
-                message: "There was an error commenting"
+                message: "There was an error getting league comment"
             })            
         }
 
