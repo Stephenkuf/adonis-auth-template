@@ -62,6 +62,10 @@ Route.get("/joinLeague/:league_id/:team_id", "League/LeagueSettingController.joi
 //Leave League
 Route.get("/leaveLeague/:league_id/:team_id", "League/LeagueSettingController.leaveLeague").middleware(['auth'])
 
+//Leave Comment
+Route.post("/leagueComment", "League/LeagueSettingController.leagueComment").validator("leagueComment").middleware(['auth'])
+Route.get("/leagueComment/:league_id", "League/LeagueSettingController.getLeagueComment").middleware(['auth'])
+
 // //Join Public League
 // Route.get("/joinPublicLeague/:league_id", "League/PublicLeagueController.joinLeague").middleware(['auth'])
 

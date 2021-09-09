@@ -9,6 +9,7 @@ const Config = use("Config");
 const makeExternalRequestFeature = use("App/Features/MakeExternalRequestFeature");
 const Wallet = use("App/Models/Wallet");
 const SystemSettings = use('App/Models/SystemSetting')
+const leagueComment = use('App/Models/LeagueComment')
 
 class LeagueSettingController {
 
@@ -16,7 +17,6 @@ class LeagueSettingController {
     async joinLeagueWithCode({
         request,
         response,
-        params,
         auth
     }) {
         //Auth User
@@ -79,12 +79,14 @@ class LeagueSettingController {
             }
             //Check if user already joined
             let getParticipant = await LeagueParticipantSchema.query().where("league_id", checkLeague.id).andWhere("user_id", user.id).andWhere("team_id", team_id).first()
-            if (getParticipant.user_status == 1) {
-                return response.status(400).json({
-                    label: "You've already joined",
-                    status_code: 400,
-                    message: `The User  ${user.id} has already joined the league`
-                })
+            if (getParticipant) {
+                if (getParticipant.user_status == 1) {
+                    return response.status(400).json({
+                        label: "You've already joined",
+                        status_code: 400,
+                        message: `The User  ${user.id} has already joined the league`
+                    })
+                }
             }
 
             //Get all Squad Player
@@ -105,7 +107,7 @@ class LeagueSettingController {
             }
 
             //Check if user wallet exist
-            if (!userWallet.balance) {
+            if (!userWallet) {
                 return response.status(400).json({
                     label: "User Wallet not found",
                     status_code: 400,
@@ -193,8 +195,13 @@ class LeagueSettingController {
 
             //Deduct Momet From User Wallet
             if (checkLeague.league_paid == 1) {
-                userWallet.balance = userWallet.balance - checkLeague.amount
-                userWallet.save()
+                return response.status(200).json({
+                    result: checkLeague,
+                    user: user.id,
+                    label: userWallet.balance,
+                    statusCode: checkLeague.amount,
+                    message: `League Joined Successfully`,
+                })
             }
 
             //Create if user has not joined
@@ -213,12 +220,6 @@ class LeagueSettingController {
                     statusCode: 200,
                     message: `League Joined Successfully`,
                 })
-            }
-
-            //Deduct Momet From User Wallet
-            if (checkLeague.league_paid == 1) {
-                userWallet.balance = userWallet.balance - checkLeague.amount
-                userWallet.save()
             }
 
             //If already join update user_status to 1
@@ -243,7 +244,6 @@ class LeagueSettingController {
                 status_code: 500,
                 message: "There was an error joining the Private League"
             })
-
         }
 
     }
@@ -259,16 +259,6 @@ class LeagueSettingController {
 
         //Get User Wallet
         const userWallet = await Wallet.query().where("user_id", user.id).first()
-        //User Wallet Handling    
-        async function deductMoney(amount) {
-            try {
-                userWallet.balance = userWallet.balance - amount
-                userWallet.save()
-                return true
-            } catch (error) {
-                return false
-            }
-        }
 
         //Format date        
         function formateDate(date) {
@@ -322,18 +312,21 @@ class LeagueSettingController {
                     message: `The Team with ID ${team_id} not found`
                 })
             }
+
             //Check if user already joined
             let getParticipant = await LeagueParticipantSchema.query().where("league_id", checkLeague.id).andWhere("user_id", user.id).andWhere("team_id", team_id).first()
-            if (getParticipant.user_status == 1) {
-                return response.status(400).json({
-                    label: "You've already joined",
-                    status_code: 400,
-                    message: `The User  ${user.id} has already joined the league`
-                })
+            if (getParticipant) {
+                if (getParticipant.user_status == 1) {
+                    return response.status(400).json({
+                        label: "You've already joined",
+                        status_code: 400,
+                        message: `The User  ${user.id} has already joined the league`
+                    })
+                }
             }
 
             //Get all Squad Player
-            const playerIds = []
+            const playerIds = [19465]
             const teamPlayerSquad = await Database.from('player_squads').where({
                 squad_id: checkSquad.id
             })
@@ -350,7 +343,7 @@ class LeagueSettingController {
             }
 
             //Check if user wallet exist
-            if (!userWallet.balance) {
+            if (!userWallet) {
                 return response.status(400).json({
                     label: "User Wallet not found",
                     status_code: 400,
@@ -414,7 +407,6 @@ class LeagueSettingController {
                 fixturesID.forEach(function (id) {
                     playerDetailsArray.push(id.players);
                 });
-
             };
 
             for (var i = 0; i < playerDetailsArray.length; i++) {
@@ -436,6 +428,14 @@ class LeagueSettingController {
                 })
             }
 
+            
+            //Deduct Momet From User Wallet
+            if (checkLeague.league_paid == 1) {
+                userWallet.balance = userWallet.balance - checkLeague.amount
+                userWallet.save()
+            }
+
+
             //Create if user has not joined
             if (!getParticipant) {
                 let JoinLeague = await LeagueParticipantSchema.create({
@@ -454,13 +454,7 @@ class LeagueSettingController {
                 })
             }
 
-
-            //Deduct Momet From User Wallet
-            if (checkLeague.league_paid == 1) {
-                userWallet.balance = userWallet.balance - checkLeague.amount
-                userWallet.save()
-            }
-
+            
             //If already join update user_status to 1
             getParticipant.user_status = 1
             getParticipant.save()
@@ -481,13 +475,12 @@ class LeagueSettingController {
                 error: error,
                 label: "Internal Server Error",
                 status_code: 500,
-                message: "There was an error joining the Private League"
+                message: "There was an error joining the League"
             })
 
         }
 
     }
-
 
     //Leave Public League
     async leaveLeague({
@@ -587,6 +580,186 @@ class LeagueSettingController {
                 message: "There was an error leaving the League"
             })
 
+        }
+
+    }
+
+    //League Comment
+    async leagueComment({
+        request,
+        response,
+        auth
+    }){
+        //Auth User
+        const user = auth.current.user
+
+        //Get User Wallet
+        const userWallet = await Wallet.query().where("user_id", user.id).first()
+
+        try {
+            //Get League Invite Code
+            let {
+                league_id,
+                team_id,
+                comment
+            } = request.all()
+
+            //Check League with league code
+            const checkLeague = await League.query().where("id", league_id).first()
+
+            if (!checkLeague) {
+                return response.status(404).json({
+                    label: "League not found",
+                    status_code: 404,
+                    message: `The League with Invite Code ${league_id} not found`
+                })
+            }
+
+            //Check if league has started or ended
+            if (checkLeague.league_status != "ended") {
+                return response.status(400).json({
+                    label: "League has not ended yet",
+                    status_code: 400,
+                    message: `The League ${checkLeague.league_name} has ended yet`
+                })
+            }
+
+            //Check if the Squad ID Exist
+            const checkSquad = await TeamSquad.query().where("user_id", user.id).andWhere("team_name_id", team_id).first()
+            if (!checkSquad) {
+                return response.status(400).json({
+                    label: "Team not found",
+                    status_code: 400,
+                    message: `The Team with ID ${team_id} not found`
+                })
+            }
+
+            //Check if user already joined
+            let getParticipant = await LeagueParticipantSchema.query().where("league_id", checkLeague.id).andWhere("user_id", user.id).andWhere("team_id", team_id).first()
+            if (!getParticipant.user_status) {
+                return response.status(400).json({
+                    label: "You are not a participant of the League",
+                    status_code: 400,
+                    message: `The User is not a participant of ${checkLeague.league_name} league`
+                })
+            }
+
+            //Save Comment
+            let saveComment = await leagueComment.create({
+                league_id: checkLeague.id,
+                user_id: user.id,
+                team_id: checkSquad.id,
+                date: new Date(),
+                comment: comment
+            })
+            
+
+            return response.status(200).json({
+                result: saveComment,
+                label: `Comment Saved`,
+                statusCode: 200,
+                message: `League Comment Saved Successfully`,
+            })
+
+            
+        } catch (error) {
+            console.log(error)
+            return response.status(500).json({
+                error: error,
+                label: "Internal Server Error",
+                status_code: 500,
+                message: "There was an error commenting"
+            })            
+        }
+
+    }
+
+    //Get League Comment
+    async getLeagueComment({
+        request,
+        response,
+        auth
+    }){
+        //Auth User
+        const user = auth.current.user
+
+        //Get User Wallet
+        const userWallet = await Wallet.query().where("user_id", user.id).first()
+
+        try {
+            //Get League Invite Code
+            let {
+                league_id,
+                team_id,
+                comment
+            } = request.all()
+
+            //Check League with league code
+            const checkLeague = await League.query().where("id", league_id).first()
+
+            if (!checkLeague) {
+                return response.status(404).json({
+                    label: "League not found",
+                    status_code: 404,
+                    message: `The League with Invite Code ${league_id} not found`
+                })
+            }
+
+            //Check if league has started or ended
+            if (checkLeague.league_status != "ended") {
+                return response.status(400).json({
+                    label: "League has not ended yet",
+                    status_code: 400,
+                    message: `The League ${checkLeague.league_name} has ended yet`
+                })
+            }
+
+            //Check if the Squad ID Exist
+            const checkSquad = await TeamSquad.query().where("user_id", user.id).andWhere("team_name_id", team_id).first()
+            if (!checkSquad) {
+                return response.status(400).json({
+                    label: "Team not found",
+                    status_code: 400,
+                    message: `The Team with ID ${team_id} not found`
+                })
+            }
+
+            //Check if user already joined
+            let getParticipant = await LeagueParticipantSchema.query().where("league_id", checkLeague.id).andWhere("user_id", user.id).andWhere("team_id", team_id).first()
+            if (!getParticipant.user_status) {
+                return response.status(400).json({
+                    label: "You are not a participant of the League",
+                    status_code: 400,
+                    message: `The User is not a participant of ${checkLeague.league_name} league`
+                })
+            }
+
+            //Save Comment
+            let saveComment = await leagueComment.create({
+                league_id: checkLeague.id,
+                user_id: user.id,
+                team_id: checkSquad.id,
+                date: new Date(),
+                comment: comment
+            })
+            
+
+            return response.status(200).json({
+                result: saveComment,
+                label: `Comment Saved`,
+                statusCode: 200,
+                message: `League Comment Saved Successfully`,
+            })
+
+            
+        } catch (error) {
+            console.log(error)
+            return response.status(500).json({
+                error: error,
+                label: "Internal Server Error",
+                status_code: 500,
+                message: "There was an error commenting"
+            })            
         }
 
     }
