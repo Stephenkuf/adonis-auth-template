@@ -1,48 +1,36 @@
 'use strict'
 
-const { first } = require("@adonisjs/lucid/src/Lucid/Model");
+const { first } = require('@adonisjs/lucid/src/Lucid/Model');
 
-const TeamSquad = use("App/Models/TeamSquad");
-const TeamName = use("App/Models/TeamName");
-const Player = use("App/Models/Player");
-const PlayerSquad = use("App/Models/PlayerSquad");
-const User = use("App/Models/User");
-const Config = use("Config");
-const Database = use("Database")
-const makeExternalRequestFeature = use("App/Features/MakeExternalRequestFeature")
-const moment = use("moment");
-const WeekSeason = use("App/Models/WeekSeason");
+const TeamSquad = use('App/Models/TeamSquad');
+const TeamName = use('App/Models/TeamName');
+const Player = use('App/Models/Player');
+const PlayerSquad = use('App/Models/PlayerSquad');
+const User = use('App/Models/User');
+const Config = use('Config');
+const Database = use('Database')
+const makeExternalRequestFeature = use('App/Features/MakeExternalRequestFeature')
+const moment = use('moment');
+const WeekSeason = use('App/Models/WeekSeason');
 
 
 
 class TeamManagementController {
 
     async createTeam({ request, response, auth }) {
-        const currentweekSeason = await WeekSeason.query().where("is_current", 1).first()
+        const currentweekSeason = await WeekSeason.query().where('is_current', 1).first()
 
         try {
             const user = auth.current.user
-            let { squad_selection, team_name } = request.all()
-            const teamUserCheck = await TeamName.query()
-                .where("user_id", user.id).first()
-
-
-            if (teamUserCheck) {
-                return response.status(400).json({
-                    results: teamUserCheck,
-                    status: "Error",
-                    status_code: 400,
-                    message: "User already has created a team"
-                })
-            }
+            const { squad_selection, team_name } = request.all()
 
             const teamNameLookup = await Database.raw(`select * from team_names TN where TN.team_name = '${team_name}' `, )
 
             if (teamNameLookup[0][0]) {
                 return response.status(400).json({
-                    status: "Error",
+                    status: 'Error',
                     status_code: 400,
-                    message: "Team name exists please choose another Team Name"
+                    message: 'Team name exists please choose another Team Name'
                 })
             }
             const teamNameCreation = await TeamName.create({
@@ -53,8 +41,9 @@ class TeamManagementController {
                 user_id: user.id,
                 team_name_id: teamNameCreation.id,
             })
-            const playerEndpoint = Config.get("rapidApi.getPlayer")
-            let year = moment().format("YYYY");
+
+            const playerEndpoint = Config.get('rapidApi.getPlayer')
+            let year = moment().format('YYYY');
             let yearInt = parseInt(year) - 1
 
             squad_selection.forEach(myFunction);
@@ -71,7 +60,7 @@ class TeamManagementController {
                     item.is_substitute = 0
                 }
 
-                console.log("currentPlayerDetails", currentPlayerDetails, currentPlayerDetails.id);
+                console.log('currentPlayerDetails', currentPlayerDetails, currentPlayerDetails.id);
                 const playerInfo = await Player.findOrCreate({
                     player_name: currentPlayerDetails.name,
                     player_id: currentPlayerDetails.id,
@@ -97,11 +86,11 @@ class TeamManagementController {
             })
 
         } catch (createTeamError) {
-            console.log("createTeamError >>>>> ", createTeamError);
+            console.log('createTeamError >>>>> ', createTeamError);
             return response.status(500).json({
-                status: "Internal Server Error",
+                status: 'Internal Server Error',
                 status_code: 500,
-                message: "There was an error creating team "
+                message: 'There was an error creating team '
             })
         }
     }
@@ -109,29 +98,41 @@ class TeamManagementController {
     async editTeam({ request, response, auth }) {
         try {
             const user = auth.current.user
-            let { squad_selection } = request.all()
+            const {team_id}= request.params;
+            const { squad_selection,team_name } = request.all()
+
+            const teamNameLookup = await Database.raw(`select * from team_names TN where TN.team_name = '${team_name}' `, )
+
+            if (teamNameLookup[0][0]) {
+                return response.status(400).json({
+                    status: 'Error',
+                    status_code: 400,
+                    message: 'Team name exists please choose another Team Name'
+                })
+            }
 
             const teamSquadCheck = await TeamSquad.query().where({
-                user_id: user.id
+                user_id: user.id,
+                id:team_id
             }).first()
 
             if (!teamSquadCheck) {
                 return response.status(400).send({
-                    status: "error",
-                    message: "User team does not exist . Check the Team name and try again ",
+                    status: 'error',
+                    message: 'User team does not exist . Check the Team name and try again ',
                     status_code: 400
                 })
             }
 
-            const playerEndpoint = Config.get("rapidApi.getPlayer")
-            let year = moment().format("YYYY");
+            console.log({teamSquadCheck});
+            const updateSquadName = await TeamName.query().where({ 'id':teamSquadCheck.team_name_id }).update({ team_name: team_name })
+
+            const playerEndpoint = Config.get('rapidApi.getPlayer')
+            let year = moment().format('YYYY');
             let yearInt = parseInt(year) - 1
-
-
             const getUserSquad = await TeamSquad.query().where({ user_id: user.id }).first()
 
             squad_selection.forEach(myFunction);
-
             async function myFunction(item) {
                 let itemId = parseInt(item.player_id)
                 let currentPlayerEndpoint = `${playerEndpoint}?id=${itemId}&season=${yearInt}`
@@ -192,7 +193,6 @@ class TeamManagementController {
                         is_substitute: item.is_substitute ? item.is_substitute : 0,
                         is_captain: item.is_captain ? item.is_captain : 0
                     })
-
                 }
             }
 
@@ -204,46 +204,49 @@ class TeamManagementController {
             })
 
         } catch (UpdateTeamError) {
-            console.log("UpdateTeamError >>>>> ", UpdateTeamError);
+            console.log('UpdateTeamError >>>>> ', UpdateTeamError);
             return response.status(500).json({
-                status: "Internal Server Error",
+                status: 'Internal Server Error',
                 status_code: 500,
-                message: "There was an error Updating team "
+                message: 'There was an error Updating team '
             })
         }
     }
 
-
     async viewUserTeam({ request, response, auth }) {
         try {
+            const {team_id}= request.params;
             const user = auth.current.user
 
-            const userSquad = await TeamSquad.query().where("user_id", user.id).first()
-            if (!userSquad) {
-                return response.status(200).json({
-                    result: {},
-                    label: `Team Fetch`,
-                    statusCode: 200,
-                    message: `You don't have a team yet.`,
+            const teamSquadCheck = await TeamSquad.query().where({
+                user_id: user.id,
+                id:team_id
+            }).first()
+
+            if (!teamSquadCheck) {
+                return response.status(400).send({
+                    status: 'error',
+                    message: 'User team does not exist . Check the Team Id and try again ',
+                    status_code: 400
                 })
             }
 
-            const teamDetails = await TeamName.query().where("user_id", user.id).first()
+            const teamDetails = await TeamName.query().where('id', teamSquadCheck.id).first()
 
             if (!teamDetails) {
                 return response.status(200).json({
                     result: {},
                     label: `Team Fetch`,
                     statusCode: 200,
-                    message: `You don't have a team yet.`,
+                    message: `Team not found.`,
                 })
             }
+
+            console.log(teamSquadCheck.id);
             const viewUserTeam = await PlayerSquad.query()
-                .where("squad_id", userSquad.id)
-                .with("player")
+                .where('squad_id', teamSquadCheck.id)
+                .with('player')
                 .fetch()
-
-
 
             if (!viewUserTeam) {
                 return response.status(200).json({
@@ -265,11 +268,11 @@ class TeamManagementController {
 
 
         } catch (viewUserTeamError) {
-            console.log(" selectSquadPlayer Error >>>>> ", viewUserTeamError);
+            console.log(' selectSquadPlayer Error >>>>> ', viewUserTeamError);
             return response.status(500).json({
-                status: "Internal Server Error",
+                status: 'Internal Server Error',
                 status_code: 500,
-                message: "There was an error viewing User Team"
+                message: 'There was an error viewing User Team'
             })
         }
 
@@ -281,12 +284,12 @@ class TeamManagementController {
             const user = auth.current.user
 
             const viewUserTeam = await User.query()
-                .where("id", user.id)
-                .with("teamName")
+                .where('id', user.id)
+                .with('teamName')
                 .setHidden([
-                    "created_at",
-                    "password",
-                    "updated_at",
+                    'created_at',
+                    'password',
+                    'updated_at',
                 ])
                 .fetch()
 
@@ -299,11 +302,11 @@ class TeamManagementController {
 
 
         } catch (viewUserTeamError) {
-            console.log(" selectSquadPlayer Error >>>>> ", viewUserTeamError);
+            console.log(' selectSquadPlayer Error >>>>> ', viewUserTeamError);
             return response.status(500).json({
-                status: "Internal Server Error",
+                status: 'Internal Server Error',
                 status_code: 500,
-                message: "There was an error getting User profile Player"
+                message: 'There was an error getting User profile Player'
             })
         }
 

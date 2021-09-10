@@ -29,15 +29,20 @@ class RankingController {
                 result:viewRankingsError, 
                 status:"Internal Server Error", 
                 status_code:500, 
-                message: "There was an error fetchingRankings"
+                message: "There was an error fetching Rankings"
         })  
         }
     }
-    async userTeamRankings({ response , auth }){
+    async userTeamRankings({ response , auth  , request}){
         try {
+
+            const {team_id} = request.params;
             const user = auth.current.user
             const currentweekSeason  = await WeekSeason.query().where("is_current", 1).first()
-            const userSquad  = await TeamSquad.query().where("user_id", user.id).first()
+            const userSquad  = await TeamSquad.query().where({
+                user_id: user.id,
+                id:team_id
+            }).first()
 
             const getTotalPlayers = await TeamName.query()
             .where("is_active",1).andWhere("is_deleted",0)
