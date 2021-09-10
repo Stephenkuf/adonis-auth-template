@@ -7,13 +7,14 @@ class LeagueSchema extends Schema {
     up() {
         this.create('leagues', (table) => {
             table.increments()
-            table.integer("user_id").notNullable()
+            table.integer('user_id').unsigned().references('id').inTable('users')
             table.string("league_name").notNullable()
             table.string("league_invite_code").notNullable()
+            table.text("allowed_league_id").default([])
             table.enu('league_type', ['public', 'private'])
-            table.integer("league_start_week")
-            table.integer("league_end_week")
-            table.boolean('league_paid')
+            table.date("league_start_date")
+            table.date("league_end_date")
+            table.boolean('league_paid').comment('0 represent league is free league(not paid), and 1 represent it is a paid league')
             table.integer("amount")
             table.enu('league_winner_type', ['winner', 'default'])
             table.enu('league_status', ['not started', 'started', 'ended']).default('not started')

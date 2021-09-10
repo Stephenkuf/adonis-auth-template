@@ -69,10 +69,10 @@ let settings = [
 class PointSettingSeeder {
   
   async run () {
-    await Database.raw("SET FOREIGN_KEY_CHECKS = 0;");
-    await Database.truncate("point_settings");
-    await Database.table("point_settings").insert(settings);
-    await Database.raw("SET FOREIGN_KEY_CHECKS = 1;");
+    // await Database.raw("SET FOREIGN_KEY_CHECKS = 0;");
+    // await Database.truncate("point_settings");
+    // await Database.table("point_settings").insert(settings);
+    // await Database.raw("SET FOREIGN_KEY_CHECKS = 1;");
   }
 }
 
